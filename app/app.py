@@ -551,89 +551,89 @@ with ui.div(class_="main-area html-fill-item html-fill-container"):
             chat.ui()
 
         # ── TOOLBAR DEL CHAT ──────────────────────────────────────────────────────────
-        visible_models = providers.get_visible_models()
-        default_label  = providers.get_model_label(providers.DEFAULT_MODEL)
+            visible_models = providers.get_visible_models()
+            default_label  = providers.get_model_label(providers.DEFAULT_MODEL)
 
-        def split_label(full_label):
-            if "(" in full_label:
-                parts = full_label.rsplit("(", 1)
-                return parts[0].strip(), parts[1].replace(")", "").strip()
-            return full_label, ""
+            def split_label(full_label):
+                if "(" in full_label:
+                    parts = full_label.rsplit("(", 1)
+                    return parts[0].strip(), parts[1].replace(")", "").strip()
+                return full_label, ""
 
-        default_name, default_provider = split_label(default_label)
+            default_name, default_provider = split_label(default_label)
 
-        model_options_html = ""
-        for m in visible_models:
-            lbl  = providers.get_model_label(m)
-            name, prov = split_label(lbl)
-            name_safe = name.replace("'", "\\'")
-            prov_safe = prov.replace("'", "\\'")
-            model_options_html += f"""
-                <div class="model-option" onclick="selectModel('{m}', '{name_safe}', '{prov_safe}')">
-                    <span class="model-opt-name">{name}</span>
-                    <span class="model-opt-prov">{prov}</span>
+            model_options_html = ""
+            for m in visible_models:
+                lbl  = providers.get_model_label(m)
+                name, prov = split_label(lbl)
+                name_safe = name.replace("'", "\\'")
+                prov_safe = prov.replace("'", "\\'")
+                model_options_html += f"""
+                    <div class="model-option" onclick="selectModel('{m}', '{name_safe}', '{prov_safe}')">
+                        <span class="model-opt-name">{name}</span>
+                        <span class="model-opt-prov">{prov}</span>
+                    </div>
+                """
+
+            ui.HTML(f"""
+            <div class="chat-toolbar-wrapper">
+                <div id="attachment-preview-area" class="attachment-preview-area"></div>
+                <div class="chat-input-slot">
+                    <textarea id="olvera-textarea" placeholder="Escribe un mensaje..." rows="1"></textarea>
                 </div>
-            """
+                <div class="chat-toolbar">
+                    <div class="toolbar-model-area">
+                        <button id="model-selector-btn" class="model-selector-btn" onclick="toggleModelDropdown()">
+                            <span id="model-label">{default_name}</span>
+                            <span id="model-provider" class="model-provider-tag">{default_provider}</span>
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <polyline points="6 9 12 15 18 9"/>
+                            </svg>
+                        </button>
+                        <div id="model-dropdown" class="model-dropdown">
+                            {model_options_html}
+                        </div>
+                    </div>
 
-        ui.HTML(f"""
-        <div class="chat-toolbar-wrapper">
-            <div id="attachment-preview-area" class="attachment-preview-area"></div>
-            <div class="chat-input-slot">
-                <textarea id="olvera-textarea" placeholder="Escribe un mensaje..." rows="1"></textarea>
-            </div>
-            <div class="chat-toolbar">
-                <div class="toolbar-model-area">
-                    <button id="model-selector-btn" class="model-selector-btn" onclick="toggleModelDropdown()">
-                        <span id="model-label">{default_name}</span>
-                        <span id="model-provider" class="model-provider-tag">{default_provider}</span>
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                            <polyline points="6 9 12 15 18 9"/>
+                    <button id="web-search-btn" class="toolbar-btn" onclick="toggleWebSearch()" title="Búsqueda Web">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="2" y1="12" x2="22" y2="12"/>
+                            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
                         </svg>
                     </button>
-                    <div id="model-dropdown" class="model-dropdown">
-                        {model_options_html}
+
+                    <button class="toolbar-btn" onclick="triggerFileUpload()" title="Adjuntar archivo (Imagen, PDF, Word)">
+                        <script>
+                        function triggerFileUpload() {{
+                            const input = document.getElementById('file_upload_input');
+                            if (input) input.click();
+                        }}
+                        </script>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+                        </svg>
+                        <div id="file-indicator" class="file-indicator-dot"></div>
+                    </button>
+                    <div style="display:none">
+                        {ui.input_file("file_upload_input", None, accept=[".png", ".jpg", ".jpeg", ".webp", ".pdf", ".docx"], multiple=False)}
                     </div>
+
+                    <div style="flex:1"></div>
+
+                    <button id="floating-mic-btn" class="toolbar-btn toolbar-mic-btn" title="Dictado por voz">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
+                    </button>
+
+                    <button id="toolbar-send-btn" title="Enviar" onclick="sendMessage()">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="22" y1="2" x2="11" y2="13"/>
+                            <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                        </svg>
+                    </button>
                 </div>
-
-                <button id="web-search-btn" class="toolbar-btn" onclick="toggleWebSearch()" title="Búsqueda Web">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"/>
-                        <line x1="2" y1="12" x2="22" y2="12"/>
-                        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
-                    </svg>
-                </button>
-
-                <button class="toolbar-btn" onclick="triggerFileUpload()" title="Adjuntar archivo (Imagen, PDF, Word)">
-                    <script>
-                    function triggerFileUpload() {{
-                        const input = document.getElementById('file_upload_input');
-                        if (input) input.click();
-                    }}
-                    </script>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
-                    </svg>
-                    <div id="file-indicator" class="file-indicator-dot"></div>
-                </button>
-                <div style="display:none">
-                    {ui.input_file("file_upload_input", None, accept=[".png", ".jpg", ".jpeg", ".webp", ".pdf", ".docx"], multiple=False)}
-                </div>
-
-                <div style="flex:1"></div>
-
-                <button id="floating-mic-btn" class="toolbar-btn toolbar-mic-btn" title="Dictado por voz">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
-                </button>
-
-                <button id="toolbar-send-btn" title="Enviar" onclick="sendMessage()">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="22" y1="2" x2="11" y2="13"/>
-                        <polygon points="22 2 15 22 11 13 2 9 22 2"/>
-                    </svg>
-                </button>
             </div>
-        </div>
-        """)
+            """)
 
 
 
