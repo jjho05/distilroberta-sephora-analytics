@@ -283,7 +283,7 @@ app_ui = ui.page_sidebar(
 
         # TAB 2: Integración de Power BI
         ui.nav_panel(
-            "💬 Olvera AI Copilot",
+            "💬 Olvera BI Copilot",
             ui.div(
                 ui.output_ui("welcome_ui"),
                 ui.chat_ui("chat"),
@@ -325,7 +325,7 @@ app_ui = ui.page_sidebar(
     ui.tags.head(
         ui.tags.style(CUSTOM_CSS)
     ),
-    title="Olvera BI — Analytics Suite"
+    title=None
 )
 
 # ==========================================
@@ -387,7 +387,7 @@ def server(input, output, session):
                             <path d='M12 22V12'/><path d='M12 12L21 7'/><path d='M12 12L3 7'/>
                         </svg>
                     </div>
-                    <h2 style='font-family:Montserrat,sans-serif;font-weight:800;font-size:1.4rem;color:#000;margin-bottom:8px;'>Hola, soy Olvera AI</h2>
+                    <h2 style='font-family:Montserrat,sans-serif;font-weight:800;font-size:1.4rem;color:#000;margin-bottom:8px;'>Hola, soy Olvera BI</h2>
                     <p style='color:#666;font-size:0.95rem;'>Analizo en tiempo real los datos filtrados del dashboard. ¿En qué te puedo ayudar?</p>
                 """),
                 style="text-align:center;padding:30px 20px 20px;"
@@ -423,7 +423,7 @@ def server(input, output, session):
     def chat_toolbar_ui():
         return ui.HTML("""
             <div style='border-top:1px solid #EAEAEA;padding:12px 10px 0;margin-top:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;'>
-                <span style='font-size:0.78rem;color:#999;font-weight:600;letter-spacing:0.5px;'>OLVERA AI COPILOT</span>
+                <span style='font-size:0.78rem;color:#999;font-weight:600;letter-spacing:0.5px;'>OLVERA BI COPILOT</span>
                 <span style='font-size:0.78rem;color:#ccc;'>|</span>
                 <span style='font-size:0.78rem;color:#666;'>Gemini 3 Flash &bull; Contexto del dashboard inyectado automáticamente</span>
             </div>
