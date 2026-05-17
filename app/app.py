@@ -334,22 +334,22 @@ app_ui = ui.page_sidebar(
 
 def server(input, output, session):
 
+    is_empty = reactive.Value(True)
     chat = ui.Chat(id="chat")
-    
+
     @chat.on_user_submit
     async def _():
+        is_empty.set(False)
         messages = list(chat.messages())
         if len(messages) > 10:
             messages = messages[-10:]
             
-        # Inyectar el contexto de Sephora al último mensaje del usuario
+        # Inyectar el contexto del dashboard al último mensaje
         try:
             emos = input.emociones()
             df_f = sent_totals[sent_totals["emotion_es"].isin(emos)]
             res = df_f.to_string(index=False) if not df_f.empty else "Sin datos"
-            
-            contexto = f"\n\n[SYSTEM CONTEXT: Dashboard de Olvera BI filtrado por {', '.join(emos)}.\nDistribución actual de métricas:\n{res}]"
-            
+            contexto = f"\n\n[SYSTEM CONTEXT: Dashboard Olvera BI filtrado por {', '.join(emos)}.\nDistribución actual de métricas:\n{res}]"
             last_msg = messages[-1]
             if hasattr(last_msg, 'content'):
                 last_msg.content += contexto
@@ -358,7 +358,6 @@ def server(input, output, session):
         except Exception as e:
             print(f"Error inyectando contexto: {e}")
 
-        # Hacer stream de la respuesta usando el engine de Olvera AI
         async_gen = logic.stream_chat_response(
             messages=messages,
             model=providers.DEFAULT_MODEL,
@@ -367,11 +366,13 @@ def server(input, output, session):
         )
         await chat.append_message_stream(async_gen)
 
-    is_empty = reactive.Value(True)
-
-    @chat.on_user_submit
-    async def _set_not_empty():
-        is_empty.set(False)
+    @reactive.Effect
+    @reactive.event(input.suggestion_click)
+    async def _handle_suggestion():
+        prompt = input.suggestion_click()
+        if prompt:
+            is_empty.set(False)
+            await chat.append_message({"role": "user", "content": prompt})
 
     @output
     @render.ui
@@ -394,22 +395,22 @@ def server(input, output, session):
             ),
             ui.div(
                 ui.div(
-                    ui.HTML("<div style='font-weight:700;color:#000;font-size:0.9rem;margin-bottom:4px;'>\U0001f4ca Analizar emociones</div><div style='color:#666;font-size:0.82rem;'>Explica los datos actuales del dashboard</div>"),
+                    ui.HTML("<div style='font-weight:700;color:#000;font-size:0.9rem;margin-bottom:4px;'>📊 Analizar emociones</div><div style='color:#666;font-size:0.82rem;'>Explica los datos actuales del dashboard</div>"),
                     onclick="Shiny.setInputValue('suggestion_click', 'Analiza y explica las emociones del dataset de Sephora que están activas ahora', {priority:'event'})",
                     style="background:#F8F9FA;border:1px solid #EAEAEA;border-radius:10px;padding:14px 16px;cursor:pointer;transition:all 0.2s;"
                 ),
                 ui.div(
-                    ui.HTML("<div style='font-weight:700;color:#000;font-size:0.9rem;margin-bottom:4px;'>\U0001f3af Insights de marcas</div><div style='color:#666;font-size:0.82rem;'>Identifica tendencias en top 10 marcas</div>"),
+                    ui.HTML("<div style='font-weight:700;color:#000;font-size:0.9rem;margin-bottom:4px;'>🎯 Insights de marcas</div><div style='color:#666;font-size:0.82rem;'>Identifica tendencias en top 10 marcas</div>"),
                     onclick="Shiny.setInputValue('suggestion_click', '¿Qué marcas tienen mejor perfil emocional y cuáles necesitan atención?', {priority:'event'})",
                     style="background:#F8F9FA;border:1px solid #EAEAEA;border-radius:10px;padding:14px 16px;cursor:pointer;transition:all 0.2s;"
                 ),
                 ui.div(
-                    ui.HTML("<div style='font-weight:700;color:#000;font-size:0.9rem;margin-bottom:4px;'>\u26a0\ufe0f Alertas de calidad</div><div style='color:#666;font-size:0.82rem;'>Detecta picos de Ira y Desagrado</div>"),
+                    ui.HTML("<div style='font-weight:700;color:#000;font-size:0.9rem;margin-bottom:4px;'>⚠️ Alertas de calidad</div><div style='color:#666;font-size:0.82rem;'>Detecta picos de Ira y Desagrado</div>"),
                     onclick="Shiny.setInputValue('suggestion_click', 'Identifica alertas de calidad según los picos de Ira y Desagrado en el dataset', {priority:'event'})",
                     style="background:#F8F9FA;border:1px solid #EAEAEA;border-radius:10px;padding:14px 16px;cursor:pointer;transition:all 0.2s;"
                 ),
                 ui.div(
-                    ui.HTML("<div style='font-weight:700;color:#000;font-size:0.9rem;margin-bottom:4px;'>\u2b50 Rating vs emoción</div><div style='color:#666;font-size:0.82rem;'>Correlaciona calificación y sentimiento</div>"),
+                    ui.HTML("<div style='font-weight:700;color:#000;font-size:0.9rem;margin-bottom:4px;'>⭐ Rating vs emoción</div><div style='color:#666;font-size:0.82rem;'>Correlaciona calificación y sentimiento</div>"),
                     onclick="Shiny.setInputValue('suggestion_click', 'Explica la correlación entre el rating promedio y cada emoción detectada', {priority:'event'})",
                     style="background:#F8F9FA;border:1px solid #EAEAEA;border-radius:10px;padding:14px 16px;cursor:pointer;transition:all 0.2s;"
                 ),
@@ -429,15 +430,8 @@ def server(input, output, session):
             </div>
         """)
 
-    @reactive.Effect
-    @reactive.event(input.suggestion_click)
-    async def _handle_suggestion():
-        prompt = input.suggestion_click()
-        if prompt:
-            is_empty.set(False)
-            await chat.append_message({"role": "user", "content": prompt})
-
     # Filtro reactivo ultra-veloz
+
     @reactive.Calc
     def filtered_time_data():
         emos = input.emociones()
