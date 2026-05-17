@@ -2,5 +2,10 @@ shiny
 pandas
 matplotlib
 seaborn
+litellm
+httpx
+tavily-python
+python-dotenv
+pypdf
+python-docx
 google-genai
-requests
