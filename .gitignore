@@ -1,0 +1,20 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environments
+.venv/
+venv/
+ENV/
+
+# Data Files (Ignorar datasets gigantes para no romper Git)
+SEPHORA_SENTIMENT_PRO/data/
+data/
+*.csv
+!SEPHORA_SENTIMENT_PRO/app/reviews_emociones_opt.csv
+!app/reviews_emociones_opt.csv
+
+# OS metadata
+.DS_Store
+Thumbs.db
