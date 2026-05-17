@@ -288,7 +288,7 @@ app_ui = ui.page_sidebar(
                 ui.h2("Olvera AI Copilot", style="margin-top: 15px; margin-bottom: 5px; font-weight: 800;"),
                 ui.p("Asistente multimodal inteligente. Analiza en tiempo real los datos filtrados del dashboard de Sephora.", style="color: #666; margin-bottom: 20px; font-weight: 500;"),
                 ui.card(
-                    ui.Chat(id="chat").ui(),
+                    ui.chat_ui("chat"),
                     style="height: 650px; border: 1px solid #EAEAEA; box-shadow: 0 4px 20px rgba(0,0,0,0.04); border-radius: 12px;"
                 ),
                 style="padding: 10px;"
