@@ -164,9 +164,10 @@ app_ui = ui.page_sidebar(
             )
         )
     ),
-    title="Sephora Sentiment Pro",
-    theme=None, # Desactivamos el tema por defecto para inyectar nuestra estética premium
-    header=ui.tags.style(CUSTOM_CSS)
+    ui.tags.head(
+        ui.tags.style(CUSTOM_CSS)
+    ),
+    title="Sephora Sentiment Pro"
 )
 
 # ==========================================
