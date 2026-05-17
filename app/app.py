@@ -65,7 +65,7 @@ brand_df = brand_totals[brand_totals["brand_name"].isin(top_brands)]
 cat_df = df.groupby(["primary_category", "emotion_es"]).size().reset_index(name="count")
 
 
-# Paleta de colores oficial "Sephora Light Premium"
+# Paleta de colores oficial "Olvera BI Light Premium"
 COLOR_PALETTE = {
     'Alegría': '#D4AF37',    # Dorado Premium
     'Desagrado': '#FF5733',  # Coral
@@ -174,13 +174,17 @@ app_ui = ui.page_sidebar(
     ui.sidebar(
         ui.div(
             ui.div(
-                ui.tags.img(
-                    src="https://1000marcas.net/wp-content/uploads/2020/03/Logo-Sephora.png", 
-                    style="width: 100%; max-width: 160px; height: auto; margin-bottom: 10px;"
-                ),
+                ui.HTML('''
+                    <div style="background: linear-gradient(135deg, #1A1A1A 0%, #4A4A4A 100%); width: 60px; height: 60px; border-radius: 16px; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 25px rgba(0,0,0,0.1); margin-bottom: 15px;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" style="width:32px;height:32px;">
+                            <path d="M12 2L3 7V17L12 22L21 17V7L12 2Z"/>
+                            <path d="M12 22V12"/><path d="M12 12L21 7"/><path d="M12 12L3 7"/>
+                        </svg>
+                    </div>
+                '''),
                 style="display: flex; justify-content: center; margin-bottom: 15px;"
             ),
-            ui.h3("ANALYTICS PRO", style="color: #000000; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 0.95rem; letter-spacing: 3px; text-align: center; margin-top: 5px; border-bottom: 2px solid #000000; padding-bottom: 15px; margin-bottom: 25px;"),
+            ui.h3("OLVERA BI", style="color: #000000; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 1.1rem; letter-spacing: 3px; text-align: center; margin-top: 5px; border-bottom: 2px solid #000000; padding-bottom: 15px; margin-bottom: 25px;"),
         ),
         ui.input_checkbox_group(
             "emociones",
@@ -286,7 +290,7 @@ app_ui = ui.page_sidebar(
             "💬 Olvera AI Copilot",
             ui.div(
                 ui.h2("Olvera AI Copilot", style="margin-top: 15px; margin-bottom: 5px; font-weight: 800;"),
-                ui.p("Asistente multimodal inteligente. Analiza en tiempo real los datos filtrados del dashboard de Sephora.", style="color: #666; margin-bottom: 20px; font-weight: 500;"),
+                ui.p("Asistente multimodal inteligente. Analiza en tiempo real los datos filtrados del dashboard de Olvera BI.", style="color: #666; margin-bottom: 20px; font-weight: 500;"),
                 ui.card(
                     ui.chat_ui("chat"),
                     style="height: 650px; border: 1px solid #EAEAEA; box-shadow: 0 4px 20px rgba(0,0,0,0.04); border-radius: 12px;"
@@ -328,7 +332,7 @@ app_ui = ui.page_sidebar(
     ui.tags.head(
         ui.tags.style(CUSTOM_CSS)
     ),
-    title="Sephora Sentiment Pro"
+    title="Olvera BI"
 )
 
 # ==========================================
@@ -351,7 +355,7 @@ def server(input, output, session):
             df_f = sent_totals[sent_totals["emotion_es"].isin(emos)]
             res = df_f.to_string(index=False) if not df_f.empty else "Sin datos"
             
-            contexto = f"\n\n[SYSTEM CONTEXT: Dashboard de Sephora filtrado por {', '.join(emos)}.\nDistribución actual de métricas:\n{res}]"
+            contexto = f"\n\n[SYSTEM CONTEXT: Dashboard de Olvera BI filtrado por {', '.join(emos)}.\nDistribución actual de métricas:\n{res}]"
             
             last_msg = messages[-1]
             if hasattr(last_msg, 'content'):
