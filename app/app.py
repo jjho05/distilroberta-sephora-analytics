@@ -154,8 +154,8 @@ app_ui = ui.page_sidebar(
                 ui.h2("Reporte Ejecutivo Integrado", style="margin-top: 15px; margin-bottom: 20px;"),
                 ui.card(
                     ui.tags.iframe(
-                        # Nota: Aquí se coloca la URL de inserción pública de tu Power BI
-                        src="https://app.powerbi.com/view?r=eyJrIjoiOGFlZjA0NGEtYjU0MS00MGIwLWFiNDUtMTFiNmQ0ZjM1N2Y4IiwidCI6IjNkM2I1NjQ1LWVhYWEtNDJiYS1hYzUyLWM5MzE5MTBhN2YyZiIsImMiOjR9",
+                        # Integración segura de tu reporte específico de Power BI (autoAuth activa inicio de sesión automático)
+                        src="https://app.powerbi.com/reportEmbed?reportId=78c4a5f0-6608-4817-90ae-450c654714ac&autoAuth=true",
                         style="width: 100%; height: 750px; border: none; border-radius: 8px;"
                     ),
                     style="padding: 5px;"
