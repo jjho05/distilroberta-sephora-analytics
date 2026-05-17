@@ -174,17 +174,13 @@ app_ui = ui.page_sidebar(
     ui.sidebar(
         ui.div(
             ui.div(
-                ui.HTML('''
-                    <div style="background: linear-gradient(135deg, #1A1A1A 0%, #4A4A4A 100%); width: 60px; height: 60px; border-radius: 16px; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 25px rgba(0,0,0,0.1); margin-bottom: 15px;">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" style="width:32px;height:32px;">
-                            <path d="M12 2L3 7V17L12 22L21 17V7L12 2Z"/>
-                            <path d="M12 22V12"/><path d="M12 12L21 7"/><path d="M12 12L3 7"/>
-                        </svg>
-                    </div>
-                '''),
+                ui.tags.img(
+                    src="https://1000marcas.net/wp-content/uploads/2020/03/Logo-Sephora.png",
+                    style="width: 100%; max-width: 160px; height: auto; margin-bottom: 10px;"
+                ),
                 style="display: flex; justify-content: center; margin-bottom: 15px;"
             ),
-            ui.h3("OLVERA BI", style="color: #000000; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 1.1rem; letter-spacing: 3px; text-align: center; margin-top: 5px; border-bottom: 2px solid #000000; padding-bottom: 15px; margin-bottom: 25px;"),
+            ui.h3("ANALYTICS PRO", style="color: #000000; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 0.95rem; letter-spacing: 3px; text-align: center; margin-top: 5px; border-bottom: 2px solid #000000; padding-bottom: 15px; margin-bottom: 25px;"),
         ),
         ui.input_checkbox_group(
             "emociones",
@@ -289,13 +285,10 @@ app_ui = ui.page_sidebar(
         ui.nav_panel(
             "💬 Olvera AI Copilot",
             ui.div(
-                ui.h2("Olvera AI Copilot", style="margin-top: 15px; margin-bottom: 5px; font-weight: 800;"),
-                ui.p("Asistente multimodal inteligente. Analiza en tiempo real los datos filtrados del dashboard de Olvera BI.", style="color: #666; margin-bottom: 20px; font-weight: 500;"),
-                ui.card(
-                    ui.chat_ui("chat"),
-                    style="height: 650px; border: 1px solid #EAEAEA; box-shadow: 0 4px 20px rgba(0,0,0,0.04); border-radius: 12px;"
-                ),
-                style="padding: 10px;"
+                ui.output_ui("welcome_ui"),
+                ui.chat_ui("chat"),
+                ui.output_ui("chat_toolbar_ui"),
+                style="padding: 10px; display: flex; flex-direction: column; height: 100%;"
             )
         ),
         ui.nav_panel(
@@ -332,7 +325,7 @@ app_ui = ui.page_sidebar(
     ui.tags.head(
         ui.tags.style(CUSTOM_CSS)
     ),
-    title="Olvera BI"
+    title="Olvera BI — Analytics Suite"
 )
 
 # ==========================================
@@ -373,6 +366,76 @@ def server(input, output, session):
             image_b64=None
         )
         await chat.append_message_stream(async_gen)
+
+    is_empty = reactive.Value(True)
+
+    @chat.on_user_submit
+    async def _set_not_empty():
+        is_empty.set(False)
+
+    @output
+    @render.ui
+    def welcome_ui():
+        if not is_empty.get():
+            return ui.div()
+        return ui.div(
+            ui.div(
+                ui.HTML("""
+                    <div class="welcome-icon" style="width:64px;height:64px;background:#000;border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;box-shadow:0 10px 30px rgba(0,0,0,0.15)">
+                        <svg viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='1.5' style='width:36px;height:36px;'>
+                            <path d='M12 2L3 7V17L12 22L21 17V7L12 2Z'/>
+                            <path d='M12 22V12'/><path d='M12 12L21 7'/><path d='M12 12L3 7'/>
+                        </svg>
+                    </div>
+                    <h2 style='font-family:Montserrat,sans-serif;font-weight:800;font-size:1.4rem;color:#000;margin-bottom:8px;'>Hola, soy Olvera AI</h2>
+                    <p style='color:#666;font-size:0.95rem;'>Analizo en tiempo real los datos filtrados del dashboard. ¿En qué te puedo ayudar?</p>
+                """),
+                style="text-align:center;padding:30px 20px 20px;"
+            ),
+            ui.div(
+                ui.div(
+                    ui.HTML("<div style='font-weight:700;color:#000;font-size:0.9rem;margin-bottom:4px;'>\U0001f4ca Analizar emociones</div><div style='color:#666;font-size:0.82rem;'>Explica los datos actuales del dashboard</div>"),
+                    onclick="Shiny.setInputValue('suggestion_click', 'Analiza y explica las emociones del dataset de Sephora que están activas ahora', {priority:'event'})",
+                    style="background:#F8F9FA;border:1px solid #EAEAEA;border-radius:10px;padding:14px 16px;cursor:pointer;transition:all 0.2s;"
+                ),
+                ui.div(
+                    ui.HTML("<div style='font-weight:700;color:#000;font-size:0.9rem;margin-bottom:4px;'>\U0001f3af Insights de marcas</div><div style='color:#666;font-size:0.82rem;'>Identifica tendencias en top 10 marcas</div>"),
+                    onclick="Shiny.setInputValue('suggestion_click', '¿Qué marcas tienen mejor perfil emocional y cuáles necesitan atención?', {priority:'event'})",
+                    style="background:#F8F9FA;border:1px solid #EAEAEA;border-radius:10px;padding:14px 16px;cursor:pointer;transition:all 0.2s;"
+                ),
+                ui.div(
+                    ui.HTML("<div style='font-weight:700;color:#000;font-size:0.9rem;margin-bottom:4px;'>\u26a0\ufe0f Alertas de calidad</div><div style='color:#666;font-size:0.82rem;'>Detecta picos de Ira y Desagrado</div>"),
+                    onclick="Shiny.setInputValue('suggestion_click', 'Identifica alertas de calidad según los picos de Ira y Desagrado en el dataset', {priority:'event'})",
+                    style="background:#F8F9FA;border:1px solid #EAEAEA;border-radius:10px;padding:14px 16px;cursor:pointer;transition:all 0.2s;"
+                ),
+                ui.div(
+                    ui.HTML("<div style='font-weight:700;color:#000;font-size:0.9rem;margin-bottom:4px;'>\u2b50 Rating vs emoción</div><div style='color:#666;font-size:0.82rem;'>Correlaciona calificación y sentimiento</div>"),
+                    onclick="Shiny.setInputValue('suggestion_click', 'Explica la correlación entre el rating promedio y cada emoción detectada', {priority:'event'})",
+                    style="background:#F8F9FA;border:1px solid #EAEAEA;border-radius:10px;padding:14px 16px;cursor:pointer;transition:all 0.2s;"
+                ),
+                style="display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 20px 20px;"
+            ),
+            style="max-width:680px;margin:0 auto;"
+        )
+
+    @output
+    @render.ui
+    def chat_toolbar_ui():
+        return ui.HTML("""
+            <div style='border-top:1px solid #EAEAEA;padding:12px 10px 0;margin-top:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;'>
+                <span style='font-size:0.78rem;color:#999;font-weight:600;letter-spacing:0.5px;'>OLVERA AI COPILOT</span>
+                <span style='font-size:0.78rem;color:#ccc;'>|</span>
+                <span style='font-size:0.78rem;color:#666;'>Gemini 3 Flash &bull; Contexto del dashboard inyectado automáticamente</span>
+            </div>
+        """)
+
+    @reactive.Effect
+    @reactive.event(input.suggestion_click)
+    async def _handle_suggestion():
+        prompt = input.suggestion_click()
+        if prompt:
+            is_empty.set(False)
+            await chat.append_message({"role": "user", "content": prompt})
 
     # Filtro reactivo ultra-veloz
     @reactive.Calc
