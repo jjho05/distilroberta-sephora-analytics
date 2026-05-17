@@ -2,3 +2,5 @@ shiny
 pandas
 matplotlib
 seaborn
+google-genai
+requests
