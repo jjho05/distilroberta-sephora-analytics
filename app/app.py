@@ -186,17 +186,13 @@ h2, h3, h4 {
 app_ui = ui.page_sidebar(
     ui.sidebar(
         ui.div(
-            ui.HTML("""
-            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid #EAEAEA;">
-                <div style="width: 42px; height: 42px; border-radius: 12px; background: linear-gradient(135deg, #10A37F, #0E8E6D); display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
-                    ✨
-                </div>
-                <div>
-                    <div style="font-weight: 800; font-size: 1.2rem; color: #1a1a1a; font-family: 'Montserrat', sans-serif; letter-spacing: 0.5px;">Olvera BI</div>
-                    <div style="font-size: 0.75rem; color: #666666; font-weight: 500; letter-spacing: 0.5px;">Programación para Ciencia de Datos</div>
-                </div>
-            </div>
-            """)
+            ui.div(
+                ui.tags.img(
+                    src="https://1000marcas.net/wp-content/uploads/2020/03/Logo-Sephora.png",
+                    style="width: 100%; max-width: 160px; height: auto; margin-bottom: 15px;"
+                ),
+                style="display: flex; justify-content: center; margin-bottom: 20px;"
+            ),
         ),
         ui.input_checkbox_group(
             "emociones",
