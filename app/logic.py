@@ -16,10 +16,6 @@ load_dotenv()
 
 def resolve_model(model_id: str) -> tuple[str, dict]:
     """Mapea el model_id interno al formato y credenciales correctas de LiteLLM."""
-    if model_id.startswith("gemini/"):
-        return model_id, {
-            "api_key": os.getenv("GEMINI_API_KEY")
-        }
     if model_id.startswith("openai/") or model_id.startswith("meta-") or model_id.startswith("google/"):
         return f"openrouter/{model_id}", {
             "api_key": os.getenv("OPENROUTER_API_KEY"),

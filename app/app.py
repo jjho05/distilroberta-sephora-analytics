@@ -14,22 +14,13 @@ import providers
 # 1. OPTIMIZACIÓN Y CARGA DE DATOS (PRO SUITE)
 # ==========================================
 
-# Definimos la ruta local del dataset completo (36MB) para máximo contexto analítico.
-# Buscamos primero en el mismo directorio (para despliegue en Hugging Face / Docker).
-DATA_FILE = os.path.join(os.path.dirname(__file__), "sephora_with_emotions.csv")
+# Definimos la ruta local del dataset optimizado
+DATA_FILE = os.path.join(os.path.dirname(__file__), "reviews_emociones_opt.csv")
 
 if not os.path.exists(DATA_FILE):
-    # Intentar buscar en la ruta del repositorio de desarrollo local
-    DATA_FILE = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "processed", "sephora_with_emotions.csv")
+    raise FileNotFoundError(f"No se encontró el archivo de datos en: {DATA_FILE}")
 
-if not os.path.exists(DATA_FILE):
-    # Fallback al dataset optimizado
-    DATA_FILE = os.path.join(os.path.dirname(__file__), "reviews_emociones_opt.csv")
-
-if not os.path.exists(DATA_FILE):
-    raise FileNotFoundError(f"No se encontró ningún archivo de datos (sephora_with_emotions.csv ni reviews_emociones_opt.csv) en: {os.path.dirname(__file__)}")
-
-print(f"📥 Cargando base de datos desde: {DATA_FILE}")
+print("📥 Cargando base de datos optimizada (5.7 MB)...")
 df = pd.read_csv(DATA_FILE)
 
 # Convertir fechas de forma segura y veloz
@@ -188,7 +179,7 @@ h2, h3, h4 {
 .shiny-chat-messages {
     flex-grow: 1 !important;
     overflow-y: auto !important;
-    padding-bottom: 140px !important; /* Espacio extra para que ningún texto pase detrás de la barra de input */
+    padding-bottom: 80px !important; /* Espacio extra para que ningún texto pase detrás de la barra de input */
 }
 """
 
@@ -354,7 +345,7 @@ app_ui = ui.page_sidebar(
 )
 
 # ==========================================
-# 3. LÓGICA DEL SERVIDOR (FAST REACTIVE)
+# 3. LÓGICA DEL SERVIDOR (FAST REACTIVE - MODO CLARO)
 # ==========================================
 
 def server(input, output, session):
@@ -377,20 +368,11 @@ def server(input, output, session):
             df_cats = cat_df[cat_df["emotion_es"].isin(emos)]
             df_ratings = rating_df[rating_df["emotion_es"].isin(emos)]
             
-            # Obtener una muestra aleatoria (o los top) de reviews crudos (hasta 5)
-            df_raw = df[df["emotion_es"].isin(emos)]
-            sample_reviews = "Sin reseñas disponibles."
-            if not df_raw.empty:
-                # Tomar los 5 más recientes o aleatorios que tengan texto
-                df_raw_sample = df_raw.dropna(subset=['review_text']).head(5)
-                sample_reviews = "\n".join([f"- [{row['brand_name']}] Rating: {row['rating']}⭐: \"{row['review_text']}\"" for _, row in df_raw_sample.iterrows()])
-            
             ctx = f"\n\n[CONTEXTO OLVERA BI - FILTROS ACTIVOS: {', '.join(emos)}]\n"
             ctx += "-- TOTALES POR EMOCIÓN --\n" + (df_totals.to_string(index=False) if not df_totals.empty else "N/A") + "\n\n"
             ctx += "-- COMPORTAMIENTO TOP 10 MARCAS --\n" + (df_brands.to_string(index=False) if not df_brands.empty else "N/A") + "\n\n"
             ctx += "-- EMOCIONES POR CATEGORÍA DE PRODUCTO --\n" + (df_cats.to_string(index=False) if not df_cats.empty else "N/A") + "\n\n"
-            ctx += "-- RATING PROMEDIO (1-5 ESTRELLAS) VS EMOCIÓN --\n" + (df_ratings.to_string(index=False) if not df_ratings.empty else "N/A") + "\n\n"
-            ctx += "-- MUESTRA DE RESEÑAS REALES DE USUARIOS --\n" + sample_reviews
+            ctx += "-- RATING PROMEDIO (1-5 ESTRELLAS) VS EMOCIÓN --\n" + (df_ratings.to_string(index=False) if not df_ratings.empty else "N/A")
             
             last_msg = messages[-1]
             if hasattr(last_msg, 'content'):
@@ -424,40 +406,19 @@ def server(input, output, session):
             df_cats = cat_df[cat_df["emotion_es"].isin(emos)]
             df_ratings = rating_df[rating_df["emotion_es"].isin(emos)]
             
-            # Obtener una muestra aleatoria (o los top) de reviews crudos (hasta 5)
-            df_raw = df[df["emotion_es"].isin(emos)]
-            sample_reviews = "Sin reseñas disponibles."
-            if not df_raw.empty:
-                # Tomar los 5 más recientes o aleatorios que tengan texto
-                df_raw_sample = df_raw.dropna(subset=['review_text']).head(5)
-                sample_reviews = "\n".join([f"- [{row['brand_name']}] Rating: {row['rating']}⭐: \"{row['review_text']}\"" for _, row in df_raw_sample.iterrows()])
-            
             ctx = f"\n\n[CONTEXTO OLVERA BI - FILTROS ACTIVOS: {', '.join(emos)}]\n"
             ctx += "-- TOTALES POR EMOCIÓN --\n" + (df_totals.to_string(index=False) if not df_totals.empty else "N/A") + "\n\n"
             ctx += "-- COMPORTAMIENTO TOP 10 MARCAS --\n" + (df_brands.to_string(index=False) if not df_brands.empty else "N/A") + "\n\n"
             ctx += "-- EMOCIONES POR CATEGORÍA DE PRODUCTO --\n" + (df_cats.to_string(index=False) if not df_cats.empty else "N/A") + "\n\n"
-            ctx += "-- RATING PROMEDIO (1-5 ESTRELLAS) VS EMOCIÓN --\n" + (df_ratings.to_string(index=False) if not df_ratings.empty else "N/A") + "\n\n"
-            ctx += "-- MUESTRA DE RESEÑAS REALES DE USUARIOS --\n" + sample_reviews
+            ctx += "-- RATING PROMEDIO (1-5 ESTRELLAS) VS EMOCIÓN --\n" + (df_ratings.to_string(index=False) if not df_ratings.empty else "N/A")
             
             enriched_prompt = prompt + ctx
         except Exception as e:
             print(f"Error inyectando contexto en sugerencia: {e}")
             enriched_prompt = prompt
-        
-        # Obtener el historial completo y actualizar el último mensaje
-        msgs = list(chat.messages(format="dict"))
-        if msgs and msgs[-1]["role"] == "user":
-            msgs[-1]["content"] = enriched_prompt
-        else:
-            msgs.append({"role": "user", "content": enriched_prompt})
-            
-        msgs.insert(0, {
-            "role": "system", 
-            "content": "Eres Olvera BI Copilot, un analista de datos avanzado y experto en Power BI..."
-        })
-        
+        messages = [{"role": "user", "content": enriched_prompt}]
         async_gen = logic.stream_chat_response(
-            messages=msgs,
+            messages=messages,
             model=providers.DEFAULT_MODEL,
             web_search_enabled=False,
             image_b64=None
@@ -760,4 +721,3 @@ def server(input, output, session):
 # 4. INSTANCIACIÓN DE APLICACIÓN
 # ==========================================
 app = App(app_ui, server)
-
