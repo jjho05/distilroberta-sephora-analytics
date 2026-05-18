@@ -14,6 +14,7 @@ data/
 *.csv
 !SEPHORA_SENTIMENT_PRO/app/reviews_emociones_opt.csv
 !app/reviews_emociones_opt.csv
+!data/processed/sephora_with_emotions.csv
 
 # OS metadata
 .DS_Store
