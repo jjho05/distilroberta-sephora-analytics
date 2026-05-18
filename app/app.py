@@ -14,13 +14,13 @@ import providers
 # 1. OPTIMIZACIÓN Y CARGA DE DATOS (PRO SUITE)
 # ==========================================
 
-# Definimos la ruta local del dataset optimizado
-DATA_FILE = os.path.join(os.path.dirname(__file__), "reviews_emociones_opt.csv")
+# Definimos la ruta local del dataset completo (36MB) para máximo contexto analítico
+DATA_FILE = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "processed", "sephora_with_emotions.csv")
 
 if not os.path.exists(DATA_FILE):
     raise FileNotFoundError(f"No se encontró el archivo de datos en: {DATA_FILE}")
 
-print("📥 Cargando base de datos optimizada (5.7 MB)...")
+print("📥 Cargando base de datos completa de Sephora (36 MB)...")
 df = pd.read_csv(DATA_FILE)
 
 # Convertir fechas de forma segura y veloz
@@ -179,21 +179,24 @@ h2, h3, h4 {
 .shiny-chat-messages {
     flex-grow: 1 !important;
     overflow-y: auto !important;
-    padding-bottom: 80px !important; /* Espacio extra para que ningún texto pase detrás de la barra de input */
+    padding-bottom: 140px !important; /* Espacio extra para que ningún texto pase detrás de la barra de input */
 }
 """
 
 app_ui = ui.page_sidebar(
     ui.sidebar(
         ui.div(
-            ui.div(
-                ui.tags.img(
-                    src="https://1000marcas.net/wp-content/uploads/2020/03/Logo-Sephora.png",
-                    style="width: 100%; max-width: 160px; height: auto; margin-bottom: 10px;"
-                ),
-                style="display: flex; justify-content: center; margin-bottom: 15px;"
-            ),
-            ui.h3("ANALYTICS PRO", style="color: #000000; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 0.95rem; letter-spacing: 3px; text-align: center; margin-top: 5px; border-bottom: 2px solid #000000; padding-bottom: 15px; margin-bottom: 25px;"),
+            ui.HTML("""
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid #EAEAEA;">
+                <div style="width: 42px; height: 42px; border-radius: 12px; background: linear-gradient(135deg, #10A37F, #0E8E6D); display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                    ✨
+                </div>
+                <div>
+                    <div style="font-weight: 800; font-size: 1.2rem; color: #1a1a1a; font-family: 'Montserrat', sans-serif; letter-spacing: 0.5px;">Olvera BI</div>
+                    <div style="font-size: 0.75rem; color: #666666; font-weight: 500; letter-spacing: 0.5px;">Programación para Ciencia de Datos</div>
+                </div>
+            </div>
+            """)
         ),
         ui.input_checkbox_group(
             "emociones",
@@ -368,11 +371,20 @@ def server(input, output, session):
             df_cats = cat_df[cat_df["emotion_es"].isin(emos)]
             df_ratings = rating_df[rating_df["emotion_es"].isin(emos)]
             
+            # Obtener una muestra aleatoria (o los top) de reviews crudos (hasta 5)
+            df_raw = df[df["emotion_es"].isin(emos)]
+            sample_reviews = "Sin reseñas disponibles."
+            if not df_raw.empty:
+                # Tomar los 5 más recientes o aleatorios que tengan texto
+                df_raw_sample = df_raw.dropna(subset=['review_text']).head(5)
+                sample_reviews = "\n".join([f"- [{row['brand_name']}] Rating: {row['rating']}⭐: \"{row['review_text']}\"" for _, row in df_raw_sample.iterrows()])
+            
             ctx = f"\n\n[CONTEXTO OLVERA BI - FILTROS ACTIVOS: {', '.join(emos)}]\n"
             ctx += "-- TOTALES POR EMOCIÓN --\n" + (df_totals.to_string(index=False) if not df_totals.empty else "N/A") + "\n\n"
             ctx += "-- COMPORTAMIENTO TOP 10 MARCAS --\n" + (df_brands.to_string(index=False) if not df_brands.empty else "N/A") + "\n\n"
             ctx += "-- EMOCIONES POR CATEGORÍA DE PRODUCTO --\n" + (df_cats.to_string(index=False) if not df_cats.empty else "N/A") + "\n\n"
-            ctx += "-- RATING PROMEDIO (1-5 ESTRELLAS) VS EMOCIÓN --\n" + (df_ratings.to_string(index=False) if not df_ratings.empty else "N/A")
+            ctx += "-- RATING PROMEDIO (1-5 ESTRELLAS) VS EMOCIÓN --\n" + (df_ratings.to_string(index=False) if not df_ratings.empty else "N/A") + "\n\n"
+            ctx += "-- MUESTRA DE RESEÑAS REALES DE USUARIOS --\n" + sample_reviews
             
             last_msg = messages[-1]
             if hasattr(last_msg, 'content'):
@@ -406,19 +418,40 @@ def server(input, output, session):
             df_cats = cat_df[cat_df["emotion_es"].isin(emos)]
             df_ratings = rating_df[rating_df["emotion_es"].isin(emos)]
             
+            # Obtener una muestra aleatoria (o los top) de reviews crudos (hasta 5)
+            df_raw = df[df["emotion_es"].isin(emos)]
+            sample_reviews = "Sin reseñas disponibles."
+            if not df_raw.empty:
+                # Tomar los 5 más recientes o aleatorios que tengan texto
+                df_raw_sample = df_raw.dropna(subset=['review_text']).head(5)
+                sample_reviews = "\n".join([f"- [{row['brand_name']}] Rating: {row['rating']}⭐: \"{row['review_text']}\"" for _, row in df_raw_sample.iterrows()])
+            
             ctx = f"\n\n[CONTEXTO OLVERA BI - FILTROS ACTIVOS: {', '.join(emos)}]\n"
             ctx += "-- TOTALES POR EMOCIÓN --\n" + (df_totals.to_string(index=False) if not df_totals.empty else "N/A") + "\n\n"
             ctx += "-- COMPORTAMIENTO TOP 10 MARCAS --\n" + (df_brands.to_string(index=False) if not df_brands.empty else "N/A") + "\n\n"
             ctx += "-- EMOCIONES POR CATEGORÍA DE PRODUCTO --\n" + (df_cats.to_string(index=False) if not df_cats.empty else "N/A") + "\n\n"
-            ctx += "-- RATING PROMEDIO (1-5 ESTRELLAS) VS EMOCIÓN --\n" + (df_ratings.to_string(index=False) if not df_ratings.empty else "N/A")
+            ctx += "-- RATING PROMEDIO (1-5 ESTRELLAS) VS EMOCIÓN --\n" + (df_ratings.to_string(index=False) if not df_ratings.empty else "N/A") + "\n\n"
+            ctx += "-- MUESTRA DE RESEÑAS REALES DE USUARIOS --\n" + sample_reviews
             
             enriched_prompt = prompt + ctx
         except Exception as e:
             print(f"Error inyectando contexto en sugerencia: {e}")
             enriched_prompt = prompt
-        messages = [{"role": "user", "content": enriched_prompt}]
+        
+        # Obtener el historial completo y actualizar el último mensaje
+        msgs = chat.messages(format="dict")
+        if msgs and msgs[-1]["role"] == "user":
+            msgs[-1]["content"] = enriched_prompt
+        else:
+            msgs.append({"role": "user", "content": enriched_prompt})
+            
+        msgs.insert(0, {
+            "role": "system", 
+            "content": "Eres Olvera BI Copilot, un analista de datos avanzado y experto en Power BI..."
+        })
+        
         async_gen = logic.stream_chat_response(
-            messages=messages,
+            messages=msgs,
             model=providers.DEFAULT_MODEL,
             web_search_enabled=False,
             image_b64=None
