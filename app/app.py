@@ -360,19 +360,27 @@ def server(input, output, session):
         if len(messages) > 10:
             messages = messages[-10:]
             
-        # Inyectar el contexto del dashboard al último mensaje
+        # Inyectar el contexto completo del dataset al último mensaje
         try:
             emos = input.emociones()
-            df_f = sent_totals[sent_totals["emotion_es"].isin(emos)]
-            res = df_f.to_string(index=False) if not df_f.empty else "Sin datos"
-            contexto = f"\n\n[SYSTEM CONTEXT: Dashboard Olvera BI filtrado por {', '.join(emos)}.\nDistribución actual de métricas:\n{res}]"
+            df_totals = sent_totals[sent_totals["emotion_es"].isin(emos)]
+            df_brands = brand_df[brand_df["emotion_es"].isin(emos)]
+            df_cats = cat_df[cat_df["emotion_es"].isin(emos)]
+            df_ratings = rating_df[rating_df["emotion_es"].isin(emos)]
+            
+            ctx = f"\n\n[CONTEXTO OLVERA BI - FILTROS ACTIVOS: {', '.join(emos)}]\n"
+            ctx += "-- TOTALES POR EMOCIÓN --\n" + (df_totals.to_string(index=False) if not df_totals.empty else "N/A") + "\n\n"
+            ctx += "-- COMPORTAMIENTO TOP 10 MARCAS --\n" + (df_brands.to_string(index=False) if not df_brands.empty else "N/A") + "\n\n"
+            ctx += "-- EMOCIONES POR CATEGORÍA DE PRODUCTO --\n" + (df_cats.to_string(index=False) if not df_cats.empty else "N/A") + "\n\n"
+            ctx += "-- RATING PROMEDIO (1-5 ESTRELLAS) VS EMOCIÓN --\n" + (df_ratings.to_string(index=False) if not df_ratings.empty else "N/A")
+            
             last_msg = messages[-1]
             if hasattr(last_msg, 'content'):
-                last_msg.content += contexto
+                last_msg.content += ctx
             elif isinstance(last_msg, dict) and 'content' in last_msg:
-                last_msg['content'] += contexto
+                last_msg['content'] += ctx
         except Exception as e:
-            print(f"Error inyectando contexto: {e}")
+            print(f"Error inyectando contexto masivo: {e}")
 
         async_gen = logic.stream_chat_response(
             messages=messages,
@@ -393,11 +401,20 @@ def server(input, output, session):
         # Also trigger the AI response immediately
         try:
             emos = input.emociones()
-            df_f = sent_totals[sent_totals["emotion_es"].isin(emos)]
-            res = df_f.to_string(index=False) if not df_f.empty else "Sin datos"
-            contexto = f"\n\n[SYSTEM CONTEXT: Dashboard Olvera BI filtrado por {', '.join(emos)}.\nDistribución actual: {res}]"
-            enriched_prompt = prompt + contexto
-        except Exception:
+            df_totals = sent_totals[sent_totals["emotion_es"].isin(emos)]
+            df_brands = brand_df[brand_df["emotion_es"].isin(emos)]
+            df_cats = cat_df[cat_df["emotion_es"].isin(emos)]
+            df_ratings = rating_df[rating_df["emotion_es"].isin(emos)]
+            
+            ctx = f"\n\n[CONTEXTO OLVERA BI - FILTROS ACTIVOS: {', '.join(emos)}]\n"
+            ctx += "-- TOTALES POR EMOCIÓN --\n" + (df_totals.to_string(index=False) if not df_totals.empty else "N/A") + "\n\n"
+            ctx += "-- COMPORTAMIENTO TOP 10 MARCAS --\n" + (df_brands.to_string(index=False) if not df_brands.empty else "N/A") + "\n\n"
+            ctx += "-- EMOCIONES POR CATEGORÍA DE PRODUCTO --\n" + (df_cats.to_string(index=False) if not df_cats.empty else "N/A") + "\n\n"
+            ctx += "-- RATING PROMEDIO (1-5 ESTRELLAS) VS EMOCIÓN --\n" + (df_ratings.to_string(index=False) if not df_ratings.empty else "N/A")
+            
+            enriched_prompt = prompt + ctx
+        except Exception as e:
+            print(f"Error inyectando contexto en sugerencia: {e}")
             enriched_prompt = prompt
         messages = [{"role": "user", "content": enriched_prompt}]
         async_gen = logic.stream_chat_response(
