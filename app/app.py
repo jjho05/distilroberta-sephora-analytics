@@ -14,13 +14,22 @@ import providers
 # 1. OPTIMIZACIÓN Y CARGA DE DATOS (PRO SUITE)
 # ==========================================
 
-# Definimos la ruta local del dataset completo (36MB) para máximo contexto analítico
-DATA_FILE = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "processed", "sephora_with_emotions.csv")
+# Definimos la ruta local del dataset completo (36MB) para máximo contexto analítico.
+# Buscamos primero en el mismo directorio (para despliegue en Hugging Face / Docker).
+DATA_FILE = os.path.join(os.path.dirname(__file__), "sephora_with_emotions.csv")
 
 if not os.path.exists(DATA_FILE):
-    raise FileNotFoundError(f"No se encontró el archivo de datos en: {DATA_FILE}")
+    # Intentar buscar en la ruta del repositorio de desarrollo local
+    DATA_FILE = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "processed", "sephora_with_emotions.csv")
 
-print("📥 Cargando base de datos completa de Sephora (36 MB)...")
+if not os.path.exists(DATA_FILE):
+    # Fallback al dataset optimizado
+    DATA_FILE = os.path.join(os.path.dirname(__file__), "reviews_emociones_opt.csv")
+
+if not os.path.exists(DATA_FILE):
+    raise FileNotFoundError(f"No se encontró ningún archivo de datos (sephora_with_emotions.csv ni reviews_emociones_opt.csv) en: {os.path.dirname(__file__)}")
+
+print(f"📥 Cargando base de datos desde: {DATA_FILE}")
 df = pd.read_csv(DATA_FILE)
 
 # Convertir fechas de forma segura y veloz
