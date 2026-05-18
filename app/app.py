@@ -442,7 +442,7 @@ def server(input, output, session):
             enriched_prompt = prompt
         
         # Obtener el historial completo y actualizar el último mensaje
-        msgs = chat.messages(format="dict")
+        msgs = list(chat.messages(format="dict"))
         if msgs and msgs[-1]["role"] == "user":
             msgs[-1]["content"] = enriched_prompt
         else:
