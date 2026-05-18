@@ -168,6 +168,19 @@ h2, h3, h4 {
     font-size: 0.9rem;
     letter-spacing: 0.5px;
 }
+/* Estilos del chat para garantizar altura perfecta y evitar solapamientos */
+.shiny-chat {
+    flex-grow: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100% !important;
+    min-height: 0 !important;
+}
+.shiny-chat-messages {
+    flex-grow: 1 !important;
+    overflow-y: auto !important;
+    padding-bottom: 80px !important; /* Espacio extra para que ningún texto pase detrás de la barra de input */
+}
 """
 
 app_ui = ui.page_sidebar(
@@ -285,8 +298,11 @@ app_ui = ui.page_sidebar(
         ui.nav_panel(
             "💬 Olvera BI Copilot",
             ui.div(
-                ui.output_ui("welcome_ui"),
-                ui.chat_ui("chat"),
+                ui.card(
+                    ui.output_ui("welcome_ui"),
+                    ui.chat_ui("chat"),
+                    style="height: 720px; border: 1px solid #EAEAEA; box-shadow: 0 4px 20px rgba(0,0,0,0.04); border-radius: 12px; display: flex; flex-direction: column; overflow: hidden;"
+                ),
                 ui.output_ui("chat_toolbar_ui"),
                 style="padding: 10px;"
             )
