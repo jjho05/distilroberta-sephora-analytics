@@ -210,9 +210,7 @@ app_ui = ui.page_sidebar(
         style="padding: 25px;"
     ),
 
-    ui.div(
-        ui.div(style="height: 6px; background: repeating-linear-gradient(90deg, #000, #000 15px, #fff 15px, #fff 30px); width: 100%; border-radius: 4px 4px 0 0;"), # Stripes
-    ),
+
 
     ui.navset_tab(
         # TAB 1: Análisis Nativo de IA
