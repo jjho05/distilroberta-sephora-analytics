@@ -348,7 +348,7 @@ app_ui = ui.page_sidebar(
 )
 
 # ==========================================
-# 3. LÓGICA DEL SERVIDOR (FAST REACTIVE - MODO CLARO)
+# 3. LÓGICA DEL SERVIDOR (FAST REACTIVE)
 # ==========================================
 
 def server(input, output, session):
