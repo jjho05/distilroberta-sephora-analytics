@@ -288,7 +288,7 @@ app_ui = ui.page_sidebar(
                 ui.output_ui("welcome_ui"),
                 ui.chat_ui("chat"),
                 ui.output_ui("chat_toolbar_ui"),
-                style="padding: 10px; display: flex; flex-direction: column; height: 100%;"
+                style="padding: 10px;"
             )
         ),
         ui.nav_panel(
@@ -370,9 +370,27 @@ def server(input, output, session):
     @reactive.event(input.suggestion_click)
     async def _handle_suggestion():
         prompt = input.suggestion_click()
-        if prompt:
-            is_empty.set(False)
-            await chat.append_message({"role": "user", "content": prompt})
+        if not prompt:
+            return
+        is_empty.set(False)
+        await chat.append_message({"role": "user", "content": prompt})
+        # Also trigger the AI response immediately
+        try:
+            emos = input.emociones()
+            df_f = sent_totals[sent_totals["emotion_es"].isin(emos)]
+            res = df_f.to_string(index=False) if not df_f.empty else "Sin datos"
+            contexto = f"\n\n[SYSTEM CONTEXT: Dashboard Olvera BI filtrado por {', '.join(emos)}.\nDistribución actual: {res}]"
+            enriched_prompt = prompt + contexto
+        except Exception:
+            enriched_prompt = prompt
+        messages = [{"role": "user", "content": enriched_prompt}]
+        async_gen = logic.stream_chat_response(
+            messages=messages,
+            model=providers.DEFAULT_MODEL,
+            web_search_enabled=False,
+            image_b64=None
+        )
+        await chat.append_message_stream(async_gen)
 
     @output
     @render.ui
