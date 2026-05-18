@@ -198,10 +198,11 @@ app_ui = ui.page_sidebar(
             ui.div(
                 ui.tags.img(
                     src="https://1000marcas.net/wp-content/uploads/2020/03/Logo-Sephora.png",
-                    style="width: 100%; max-width: 160px; height: auto; margin-bottom: 15px;"
+                    style="width: 100%; max-width: 160px; height: auto; margin-bottom: 10px;"
                 ),
-                style="display: flex; justify-content: center; margin-bottom: 20px;"
+                style="display: flex; justify-content: center; margin-bottom: 15px;"
             ),
+            ui.h3("ANALYTICS PRO", style="color: #000000; font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 0.95rem; letter-spacing: 3px; text-align: center; margin-top: 5px; border-bottom: 2px solid #000000; padding-bottom: 15px; margin-bottom: 25px;"),
         ),
         ui.input_checkbox_group(
             "emociones",
@@ -219,7 +220,9 @@ app_ui = ui.page_sidebar(
         style="padding: 25px;"
     ),
 
-
+    ui.div(
+        ui.div(style="height: 6px; background: repeating-linear-gradient(90deg, #000, #000 15px, #fff 15px, #fff 30px); width: 100%; border-radius: 4px 4px 0 0;"), # Stripes
+    ),
 
     ui.navset_tab(
         # TAB 1: Análisis Nativo de IA
